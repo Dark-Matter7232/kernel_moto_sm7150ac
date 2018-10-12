@@ -723,6 +723,8 @@ struct smb_charger {
 	/* mmi based params */
 	/* Place at end of struct smb_charger as it grows */
 	struct mmi_params	mmi;
+	void			*ipc_log;
+	void			*ipc_log_reg;
 
 	/* GPIO DCIN Supply */
 	int			micro_usb_gpio;
