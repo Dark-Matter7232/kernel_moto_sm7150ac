@@ -742,6 +742,7 @@ struct smb_charger {
 	struct usbpd		*pd;
 	int			pd_contract_uv;
 	struct delayed_work	pd_contract_work;
+	bool			suspended;
 
 	/* GPIO DCIN Supply */
 	int			micro_usb_gpio;
