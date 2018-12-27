@@ -758,6 +758,7 @@ struct smb_charger {
 	bool			external_vbus;
 	bool			suspended;
 	u32			source_current_ma;
+	bool			reverse_boost;
 
 	/* GPIO DCIN Supply */
 	int			micro_usb_gpio;
