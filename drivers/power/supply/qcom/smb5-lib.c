@@ -1580,8 +1580,7 @@ int smblib_set_icl_current(struct smb_charger *chg, int icl_ua)
 	if (!chg->dcin_uusb_over_gpio_en) {
 		/* configure current */
 		if (chg->real_charger_type == POWER_SUPPLY_TYPE_USB
-			&& (chg->typec_legacy
-			|| chg->typec_mode == POWER_SUPPLY_TYPEC_SOURCE_DEFAULT
+			&& (chg->typec_mode == POWER_SUPPLY_TYPEC_SOURCE_DEFAULT
 			|| chg->connector_type ==
 				POWER_SUPPLY_CONNECTOR_MICRO_USB)) {
 			rc = set_sdp_current(chg, icl_ua);
@@ -1614,8 +1613,7 @@ int smblib_set_icl_current(struct smb_charger *chg, int icl_ua)
 	} else {
 		/* configure current */
 		if (chg->real_charger_type == POWER_SUPPLY_TYPE_USB
-			&& (chg->typec_legacy
-			|| chg->typec_mode == POWER_SUPPLY_TYPEC_SOURCE_DEFAULT
+			&& (chg->typec_mode == POWER_SUPPLY_TYPEC_SOURCE_DEFAULT
 			|| chg->connector_type ==
 				POWER_SUPPLY_CONNECTOR_MICRO_USB)
 			&& (gpio_is_valid(chg->dc_9v_gpio) &&
