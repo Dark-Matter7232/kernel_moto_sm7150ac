@@ -34,6 +34,10 @@
 #include <linux/wakeup_reason.h>
 #include "power.h"
 #include <soc/qcom/boot_stats.h>
+#ifdef CONFIG_MSM_RPM_STATS_LOG
+extern void msm_rpmstats_log_suspend_enter(void);
+extern void msm_rpmstats_log_suspend_exit(int error);
+#endif
 
 const char * const pm_labels[] = {
 	[PM_SUSPEND_TO_IDLE] = "freeze",
@@ -684,6 +688,9 @@ int pm_suspend(suspend_state_t state)
 
 	pm_suspend_marker("entry");
 	pr_info("suspend entry (%s)\n", mem_sleep_labels[state]);
+#ifdef CONFIG_MSM_RPM_STATS_LOG
+	msm_rpmstats_log_suspend_enter();
+#endif
 	error = enter_state(state);
 	if (error) {
 		suspend_stats.fail++;
@@ -691,6 +698,9 @@ int pm_suspend(suspend_state_t state)
 	} else {
 		suspend_stats.success++;
 	}
+#ifdef CONFIG_MSM_RPM_STATS_LOG
+	msm_rpmstats_log_suspend_exit(error);
+#endif
 	pm_suspend_marker("exit");
 	pr_info("suspend exit\n");
 	measure_wake_up_time();
