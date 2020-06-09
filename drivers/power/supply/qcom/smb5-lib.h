@@ -764,6 +764,17 @@ struct smb_charger {
 	int			last_wls_vout;
 	int			wireless_vout;
 
+	/* GPIO DCIN Supply */
+	int			micro_usb_gpio;
+	int			micro_usb_irq;
+	int			dc_9v_gpio;
+	int			dc_9v_irq;
+	int			usb_switch_gpio;
+	int			usb_hub_33v_en_gpio;
+	int			micro_usb_pre_state;
+	bool			dcin_uusb_over_gpio_en;
+	bool			aicl_disable;
+
 	/* mmi based params */
 	/* Place at end of struct smb_charger as it grows */
 	struct mmi_params	mmi;
@@ -777,17 +788,7 @@ struct smb_charger {
 	bool			suspended;
 	u32			source_current_ma;
 	bool			reverse_boost;
-
-	/* GPIO DCIN Supply */
-	int			micro_usb_gpio;
-	int			micro_usb_irq;
-	int			dc_9v_gpio;
-	int			dc_9v_irq;
-	int			usb_switch_gpio;
-	int			usb_hub_33v_en_gpio;
-	int			micro_usb_pre_state;
-	bool			dcin_uusb_over_gpio_en;
-	bool			aicl_disable;
+	bool			cp_active;
 };
 
 int smblib_read(struct smb_charger *chg, u16 addr, u8 *val);
@@ -963,6 +964,8 @@ int smblib_set_prop_typec_select_rp(struct smb_charger *chg,
 int smblib_set_prop_pd_active(struct smb_charger *chg,
 				const union power_supply_propval *val);
 int smblib_set_prop_pd_in_hard_reset(struct smb_charger *chg,
+				const union power_supply_propval *val);
+void smblib_set_prop_cp_enable(struct smb_charger *chg,
 				const union power_supply_propval *val);
 int smblib_set_prop_ship_mode(struct smb_charger *chg,
 				const union power_supply_propval *val);
