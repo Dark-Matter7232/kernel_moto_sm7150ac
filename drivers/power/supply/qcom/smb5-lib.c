@@ -3781,8 +3781,11 @@ int smblib_get_prop_usb_voltage_now(struct smb_charger *chg,
 		goto restore_adc_config;
 	}
 
-	if (!pval.intval)
-		return rc;
+	if (!pval.intval) {
+		ret = 0;
+		goto restore_adc_config;
+	}
+
 	/*
 	 * For PM8150B, use MID_CHG ADC channel because overvoltage is observed
 	 * to occur randomly in the USBIN channel, particularly at high
