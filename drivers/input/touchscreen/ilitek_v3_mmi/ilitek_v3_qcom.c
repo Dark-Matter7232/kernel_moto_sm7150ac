@@ -386,7 +386,7 @@ int ili_irq_register(int type)
 	ret = devm_request_threaded_irq(ilits->dev, ilits->irq_num,
 				   ilitek_plat_isr_top_half,
 				   ilitek_plat_isr_bottom_half,
-				   type | IRQF_ONESHOTT | IRQF_PERF_AFFINE, "ilitek", NULL);
+				   type | IRQF_ONESHOT | IRQF_PERF_AFFINE, "ilitek", NULL);
 
 	if (type == IRQF_TRIGGER_FALLING)
 		ILI_INFO("IRQ TYPE = IRQF_TRIGGER_FALLING\n");
