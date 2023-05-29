@@ -7354,6 +7354,8 @@ int smblib_set_prop_pr_swap_in_progress(struct smb_charger *chg,
 /***************
  * Work Queues *
  ***************/
+
+#ifdef QCOM_BASE
 static void smblib_micro_usb_switch_work(struct work_struct *work)
 {
 	struct smb_charger *chg = container_of(work, struct smb_charger,
@@ -7394,6 +7396,7 @@ static void smblib_micro_usb_switch_work(struct work_struct *work)
 
 	chg->micro_usb_pre_state = is_usb_present;
 }
+#endif
 
 static void smblib_pr_lock_clear_work(struct work_struct *work)
 {
@@ -8424,9 +8427,11 @@ int smblib_init(struct smb_charger *chg)
 					smblib_pr_swap_detach_work);
 	INIT_DELAYED_WORK(&chg->pr_lock_clear_work,
 					smblib_pr_lock_clear_work);
+#ifdef QCOM_BASE
 	if (chg->dcin_uusb_over_gpio_en)
 		INIT_DELAYED_WORK(&chg->micro_usb_switch_work,
 					smblib_micro_usb_switch_work);
+#endif
 
 	setup_timer(&chg->apsd_timer, apsd_timer_cb, (unsigned long)chg);
 
