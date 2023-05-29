@@ -82,6 +82,7 @@ endif
 ############ UAPI ############
 UAPI_DIR :=	uapi
 UAPI_INC :=	-I$(AUDIO_ROOT)/include/$(UAPI_DIR)
+MOT_INC  :=	-I$(ANDROID_BUILD_TOP)/motorola/kernel/modules/include
 
 ############ COMMON ############
 COMMON_DIR :=	include
@@ -148,7 +149,8 @@ endif
 LINUX_INC +=	-Iinclude/linux
 
 INCS +=		$(COMMON_INC) \
-		$(UAPI_INC)
+		$(UAPI_INC) \
+		$(MOT_INC)
 
 EXTRA_CFLAGS += $(INCS)
 
@@ -161,6 +163,26 @@ CDEFINES +=	-DANI_LITTLE_BYTE_ENDIAN \
 		-DPTT_SOCK_SVC_ENABLE \
 		-Wall\
 		-D__linux__
+
+ifneq (,$(filter liber%, $(TARGET_PRODUCT)))
+CDEFINES += -DCONFIG_SND_SOC_AWINIC_AW882XX
+endif
+
+ifneq (,$(filter hanoi%, $(TARGET_PRODUCT)))
+CDEFINES += -DCONFIG_SND_SOC_AWINIC_AW882XX
+endif
+
+ifneq (,$(filter odessa%, $(TARGET_PRODUCT)))
+CDEFINES += -DCONFIG_SND_SOC_AWINIC_AW882XX
+endif
+
+ifneq (,$(filter minsk%, $(TARGET_PRODUCT)))
+CDEFINES += -DCONFIG_SND_SOC_AWINIC_AW882XX
+endif
+
+ifneq (,$(filter bornr%, $(TARGET_PRODUCT)))
+CDEFINES += -DCONFIG_TAS25XX_ALGO
+endif
 
 KBUILD_CPPFLAGS += $(CDEFINES)
 

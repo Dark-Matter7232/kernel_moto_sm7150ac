@@ -59,6 +59,21 @@ ifeq ($(KERNEL_BUILD), 0)
 		export
 		INCS    +=  -include $(AUDIO_ROOT)/config/qcs405autoconf.h
 	endif
+	ifneq (,$(filter liber%, $(TARGET_PRODUCT)))
+		INCS    +=  -include $(AUDIO_ROOT)/config/liberautoconf.h
+	endif
+	ifneq (,$(filter hanoi%, $(TARGET_PRODUCT)))
+		INCS    +=  -include $(AUDIO_ROOT)/config/hanoiautoconf.h
+	endif
+	ifneq (,$(filter odessa%, $(TARGET_PRODUCT)))
+		INCS    +=  -include $(AUDIO_ROOT)/config/odessaautoconf.h
+	endif
+	ifneq (,$(filter bornr%, $(TARGET_PRODUCT)))
+		INCS    +=  -include $(AUDIO_ROOT)/config/bornrautoconf.h
+	endif
+	ifneq (,$(filter minsk%, $(TARGET_PRODUCT)))
+		INCS    +=  -include $(AUDIO_ROOT)/config/minskautoconf.h
+	endif
 endif
 
 # As per target team, build is done as follows:
@@ -84,6 +99,10 @@ UAPI_INC :=	-I$(AUDIO_ROOT)/include/$(UAPI_DIR)
 ############ COMMON ############
 COMMON_DIR :=	include
 COMMON_INC :=	-I$(AUDIO_ROOT)/$(COMMON_DIR)
+
+########### MADERA ############
+MADERA_INC := -I$(ANDROID_BUILD_TOP)/motorola/kernel/modules/include \
+	-I$(ANDROID_BUILD_TOP)/motorola/kernel/modules/sound/soc/codecs
 
 ############ ASoC Drivers ############
 
@@ -172,7 +191,8 @@ endif
 LINUX_INC +=	-Iinclude/linux
 
 INCS +=		$(COMMON_INC) \
-		$(UAPI_INC)
+		$(UAPI_INC) \
+		$(MADERA_INC)
 
 EXTRA_CFLAGS += $(INCS)
 
@@ -184,6 +204,14 @@ CDEFINES +=	-DANI_LITTLE_BYTE_ENDIAN \
 		-DPTT_SOCK_SVC_ENABLE \
 		-Wall\
 		-D__linux__
+
+ifneq (,$(filter foles%, $(TARGET_PRODUCT)))
+CDEFINES += -DCONFIG_SEC_MI2S_MODS
+endif
+
+ifneq (,$(filter bornr%, $(TARGET_PRODUCT)))
+CDEFINES += -DCONFIG_TAS25XX_ALGO
+endif
 
 KBUILD_CPPFLAGS += $(CDEFINES)
 

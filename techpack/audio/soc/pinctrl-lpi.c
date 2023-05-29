@@ -331,12 +331,20 @@ static int lpi_config_set(struct pinctrl_dev *pctldev, unsigned int pin,
 	val |= pad->pullup << LPI_GPIO_REG_PULL_SHIFT;
 	val |= lpi_drive_to_regval(pad->strength) <<
 		LPI_GPIO_REG_OUT_STRENGTH_SHIFT;
+
+	/* LPI_GPIO_REG_VAL_CTL(0x00) is for direction,
+	 * output_enabled need to set to direction register
+	 */
 	if (pad->output_enabled)
-		val |= pad->value << LPI_GPIO_REG_OE_SHIFT;
+		val |= pad->output_enabled << LPI_GPIO_REG_OE_SHIFT;
 
 	lpi_gpio_write(pad, LPI_GPIO_REG_VAL_CTL, val);
+
+	/* LPI_GPIO_REG_DIR_CTL(0x04) is for val,
+	 *  pad->value need to set to value register
+	 */
 	lpi_gpio_write(pad, LPI_GPIO_REG_DIR_CTL,
-		       pad->output_enabled << LPI_GPIO_REG_DIR_SHIFT);
+		       pad->value << LPI_GPIO_REG_DIR_SHIFT);
 done:
 	return ret;
 }
@@ -376,7 +384,10 @@ static int lpi_gpio_get(struct gpio_chip *chip, unsigned int pin)
 
 	pad = state->ctrl->desc->pins[pin].drv_data;
 
-	value = lpi_gpio_read(pad, LPI_GPIO_REG_VAL_CTL);
+	/* actually LPI_GPIO_REG_DIR_CTL(0x04) is for val
+	 */
+	value = lpi_gpio_read(pad, LPI_GPIO_REG_DIR_CTL);
+	value = value & 0x1;
 	return value;
 }
 
@@ -485,8 +496,18 @@ static void lpi_gpio_dbg_show(struct seq_file *s, struct gpio_chip *chip)
 {
 	unsigned int gpio = chip->base;
 	unsigned int i;
+	struct lpi_gpio_state *state = gpiochip_get_data(chip);
+	struct pinctrl_dev *pctrl = state->ctrl;
+	struct pin_desc *desc;
 
 	for (i = 0; i < chip->ngpio; i++, gpio++) {
+		desc = pin_desc_get(pctrl, i);
+		/* Show only the pins, which are requested using either
+		* pinctrl_request_gpio (gpio_owner set) or using pinctrl_get
+		* (mux_owner set).
+		*/
+		if (!desc->gpio_owner && !desc->mux_owner)
+		continue;
 		lpi_gpio_dbg_show_one(s, NULL, chip, i, gpio);
 		seq_puts(s, "\n");
 	}
