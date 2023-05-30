@@ -375,7 +375,7 @@ static void ilitek_tddi_wq_bat_check(struct work_struct *work)
 	ili_wq_ctrl(WQ_BAT, ENABLE);
 }
 
-static int esd_wq_delay = 4000;
+static int esd_wq_delay = 1000;
 module_param_named(esd_wq_delay, esd_wq_delay, int, 0664);
 void ili_wq_ctrl(int type, int ctrl)
 {
