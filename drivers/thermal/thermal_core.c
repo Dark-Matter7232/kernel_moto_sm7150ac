@@ -26,7 +26,6 @@
 #include <net/genetlink.h>
 #include <linux/suspend.h>
 #include <linux/kobject.h>
-#include <../base/base.h>
 
 #define CREATE_TRACE_POINTS
 #include <trace/events/thermal.h>
@@ -479,15 +478,9 @@ static void update_temperature(struct thermal_zone_device *tz)
 static void thermal_zone_device_init(struct thermal_zone_device *tz)
 {
 	struct thermal_instance *pos;
-
-	if (tz->tzp && tz->tzp->tracks_low)
-		tz->temperature = THERMAL_TEMP_INVALID_LOW;
-	else
-		tz->temperature = THERMAL_TEMP_INVALID;
-
+	tz->temperature = THERMAL_TEMP_INVALID;
 	tz->prev_low_trip = -INT_MAX;
 	tz->prev_high_trip = INT_MAX;
-
 	list_for_each_entry(pos, &tz->thermal_instances, tz_node)
 		pos->initialized = false;
 }
@@ -1042,7 +1035,7 @@ static void bind_cdev(struct thermal_cooling_device *cdev)
  */
 static struct thermal_cooling_device *
 __thermal_cooling_device_register(struct device_node *np,
-				  const char *type, void *devdata,
+				  char *type, void *devdata,
 				  const struct thermal_cooling_device_ops *ops)
 {
 	struct thermal_cooling_device *cdev;
@@ -1094,14 +1087,6 @@ __thermal_cooling_device_register(struct device_node *np,
 	if (cdev_softlink_kobj == NULL) {
 		cdev_softlink_kobj = kobject_create_and_add("cdev-by-name",
 						cdev->device.kobj.parent);
-		result = sysfs_create_link(&cdev->device.class->p->subsys.kobj,
-							cdev_softlink_kobj,
-							"cdev-by-name");
-		if (result) {
-			dev_err(&cdev->device,
-				"Fail to create cdev_map "
-				"soft link in class\n");
-		}
 	}
 	mutex_unlock(&cdev_softlink_lock);
 
@@ -1142,7 +1127,7 @@ __thermal_cooling_device_register(struct device_node *np,
  * ERR_PTR. Caller must check return value with IS_ERR*() helpers.
  */
 struct thermal_cooling_device *
-thermal_cooling_device_register(const char *type, void *devdata,
+thermal_cooling_device_register(char *type, void *devdata,
 				const struct thermal_cooling_device_ops *ops)
 {
 	return __thermal_cooling_device_register(NULL, type, devdata, ops);
@@ -1166,7 +1151,7 @@ EXPORT_SYMBOL_GPL(thermal_cooling_device_register);
  */
 struct thermal_cooling_device *
 thermal_of_cooling_device_register(struct device_node *np,
-				   const char *type, void *devdata,
+				   char *type, void *devdata,
 				   const struct thermal_cooling_device_ops *ops)
 {
 	return __thermal_cooling_device_register(np, type, devdata, ops);
@@ -1418,13 +1403,6 @@ thermal_zone_device_register(const char *type, int trips, int mask,
 	if (tz_softlink_kobj == NULL) {
 		tz_softlink_kobj = kobject_create_and_add("tz-by-name",
 						tz->device.kobj.parent);
-		result = sysfs_create_link(&tz->device.class->p->subsys.kobj,
-							tz_softlink_kobj,
-							"tz-by-name");
-		if (result) {
-			dev_err(&tz->device,
-				"Fail to create tz_map soft link in class\n");
-		}
 	}
 	mutex_unlock(&tz_softlink_lock);
 
@@ -1649,7 +1627,6 @@ static int thermal_pm_notify(struct notifier_block *nb,
 			     unsigned long mode, void *_unused)
 {
 	struct thermal_zone_device *tz;
-	enum thermal_device_mode tz_mode;
 
 	switch (mode) {
 	case PM_HIBERNATION_PREPARE:
@@ -1662,15 +1639,9 @@ static int thermal_pm_notify(struct notifier_block *nb,
 	case PM_POST_SUSPEND:
 		atomic_set(&in_suspend, 0);
 		list_for_each_entry(tz, &thermal_tz_list, node) {
-			tz_mode = THERMAL_DEVICE_ENABLED;
-			if (tz->ops->get_mode)
-				tz->ops->get_mode(tz, &tz_mode);
-
-			if ((tz->ops->is_wakeable &&
-				tz->ops->is_wakeable(tz)) ||
-				tz_mode == THERMAL_DEVICE_DISABLED)
+			if (tz->ops->is_wakeable &&
+				tz->ops->is_wakeable(tz))
 				continue;
-
 			thermal_zone_device_init(tz);
 			thermal_zone_device_update(tz,
 						   THERMAL_EVENT_UNSPECIFIED);
