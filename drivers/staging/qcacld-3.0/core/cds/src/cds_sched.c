@@ -36,9 +36,7 @@
 #include <linux/spinlock.h>
 #include <linux/kthread.h>
 #include <linux/cpu.h>
-#ifdef RX_PERFORMANCE
 #include <linux/sched/types.h>
-#endif
 
 static spinlock_t ssr_protect_lock;
 
@@ -822,7 +820,7 @@ static int cds_ol_rx_thread(void *arg)
 	struct sched_param scheduler_params = {0};
 
 	scheduler_params.sched_priority = 1;
-	sched_setscheduler(current, SCHED_FIFO, &scheduler_params);
+	sched_setscheduler(current, SCHED_RR, &scheduler_params);
 #else
 	set_user_nice(current, -1);
 #endif
